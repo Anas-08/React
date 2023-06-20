@@ -2,6 +2,7 @@
 // import countriesData from "../countriesData"
 import { useEffect, useState } from "react"
 import CountryCard from "./CountryCard"
+import CountryListLoadingEffect from "./CountryListLoadingEffect"
 
 
 export default function CountryLIst({ query }) {
@@ -47,11 +48,13 @@ export default function CountryLIst({ query }) {
 
   //   })
   // }
+  
+  if(!countriesData.length){
+    return (<CountryListLoadingEffect/>)
+  }
+
   return (
     <>
-{/* <h1>{`Count will Increase ${count}` }</h1>
-      <button onClick={() => setCount(count + 1)}>Remove all cards</button> */}
-
       <div className="country-container">
         {
           countriesData.filter((country) => country.name.common.toLowerCase().includes(query)).map((country) => {
@@ -66,7 +69,7 @@ export default function CountryLIst({ query }) {
               capital={country.capital?.[0]} />
           })
         }
-      </div>
+      </div>      
     </>
   )
 }

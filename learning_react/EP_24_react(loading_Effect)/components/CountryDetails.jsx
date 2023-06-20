@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import './CountryDetails.css'
 import { Link, useParams } from 'react-router-dom';
+import CountryDetailsLoadingEffect from './CountryDetailsLoadingEffect';
 
 export default function CountryDetails() {
     // const getData = new URLSearchParams(location.search).get('name');
@@ -77,13 +78,17 @@ export default function CountryDetails() {
     },[getData])
 
 
+    // if(!countryData.length){
+    //   return ()
+    // }
+
     if(notFound){
       return <h1>country not found</h1>
 
     }
     
   return ( 
-   countryData === null ? 'Loading...' : (<main>
+   countryData === null ? <CountryDetailsLoadingEffect/> : (<main>
    <div className="country-detail-container">
      <a href="#" className="back-button" onClick={()=>{history.back()}}>
        <i className="fa-solid fa-arrow-left" /> Back

@@ -1,7 +1,8 @@
 
 import { useEffect, useState } from 'react';
 import './CountryDetails.css'
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import CountryDetailsLoadingEffect from './CountryDetailsLoadingEffect';
 
 export default function CountryDetails() {
     // const getData = new URLSearchParams(location.search).get('name');
@@ -11,53 +12,59 @@ export default function CountryDetails() {
     // getting country name
     const getData = params.countryy
     // console.log(getData);
+
+    const {state} = useLocation()
+    console.log(state)
     
 
     const [countryData,setCountryData] = useState(null);
 
     const [notFound,setNotFound] = useState(false)
+
+    function updateCountryData(data){
+      setCountryData({
+        img:data.flags.svg,
+        name:data.name.common,
+        nativeName: Object.values(data.name.nativeName)[0].common,
+        population: data.population.toLocaleString('hi-IN'),
+        region: data.region,
+        subRegion:data.subregion,
+        capital:data.capital?.[0],
+        tld: data.tld.join(', '),
+        currency:Object.values(data.currencies).map((currency) => currency.name).join(', '),
+        language: Object.values(data.languages).join(', '),
+        borders:[]
+    })
+
+    if(!data.borders){
+      data.borders=[]
+    }
+    
+    Promise.all(data.borders.map((border)=>{
+      return fetch(`https://restcountries.com/v3.1/alpha/${border}`)
+      .then((res)=> res.json())
+      .then(([borderName])=> borderName.name.common)
+    }))
+    .then((borders)=>{
+      setTimeout(()=> setCountryData((prevState) => ({...prevState, borders})))
+    })
+
+    }
+
+    
     
     useEffect(()=>{
       // console.log("Call second time")
+      if(state){
+        updateCountryData(state)
+        return
+      }
         fetch(`https://restcountries.com/v3.1/name/${getData}?fullText=true`)
         .then((res)=> res.json())
         .then(([data])=>{
             // console.log(data)
 
-            setCountryData({
-                img:data.flags.svg,
-                name:data.name.common,
-                nativeName: Object.values(data.name.nativeName)[0].common,
-                population: data.population.toLocaleString('hi-IN'),
-                region: data.region,
-                subRegion:data.subregion,
-                capital:data.capital?.[0],
-                tld: data.tld.join(', '),
-                currency:Object.values(data.currencies).map((currency) => currency.name).join(', '),
-                language: Object.values(data.languages).join(', '),
-                borders:[]
-            })
-
-            // Promise.all(data.borders.map((border) => {
-            //   return fetch(`https://restcountries.com/v3.1/alpha/${border}`)
-            //   .then((res) => res.json())
-            //   .then(([borderCountry]) => borderCountry.name.common)
-            // })).then((borders) => {
-            //   setCountryData((prevState) => ({...prevState, borders }))
-            // })
-            if(!data.borders){
-              data.borders=[]
-            }
-            
-            Promise.all(data.borders.map((border)=>{
-              return fetch(`https://restcountries.com/v3.1/alpha/${border}`)
-              .then((res)=> res.json())
-              .then(([borderName])=> borderName.name.common)
-            }))
-            .then((borders)=>{
-              setCountryData((prevState) => ({...prevState, borders}))
-            })
-
+            updateCountryData(data)
 
             // data.borders.map((border)=>{
             //   fetch(`https://restcountries.com/v3.1/alpha/${border}`)
@@ -77,13 +84,17 @@ export default function CountryDetails() {
     },[getData])
 
 
+    // if(!countryData.length){
+    //   return ()
+    // }
+
     if(notFound){
       return <h1>country not found</h1>
 
     }
     
   return ( 
-   countryData === null ? 'Loading...' : (<main>
+   countryData === null ? <CountryDetailsLoadingEffect/> : (<main>
    <div className="country-detail-container">
      <a href="#" className="back-button" onClick={()=>{history.back()}}>
        <i className="fa-solid fa-arrow-left" /> Back
