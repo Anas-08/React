@@ -38,10 +38,10 @@ export default function ExpenseForm({setExpenses}) {
           return true
         }
 
-        if(rule.isNum && isNaN(value)){
-          errorsData[key] = rule.message
-          return true
-        }    
+        // if(rule.isNum && isNaN(value)){
+        //   errorsData[key] = rule.message
+        //   return true
+        // }    
 
       })
 

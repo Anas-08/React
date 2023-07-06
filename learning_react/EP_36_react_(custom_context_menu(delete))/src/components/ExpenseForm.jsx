@@ -2,15 +2,7 @@ import React, { useState } from 'react'
 import Input from './Input'
 import Select from './Select'
 
-export default function ExpenseForm({setExpenses}) {
-
-  
-
-  const [expense, setExpense] = useState({
-    title:'',
-    category:'',
-    amount:'',
-  })
+export default function ExpenseForm({expense, setExpense, setExpenses, editingRowId, setEditingRowId}) {
 
   const [errors,setErrors] = useState({})
 
@@ -18,6 +10,7 @@ export default function ExpenseForm({setExpenses}) {
     title:[{required: true, message: 'Please enter Title'}, {minLength:5, message: 'Title should have at least 5 characters'}],
     category:[{required: true, message: 'Please select Category'}],
     amount:[{required: true, message: 'Please enter Amount'}, {isNum: true, message:'Please enter a valid number'}],
+    amount:[{required: true, message: 'Please enter Amount'}, {pattern: /^[1-9]\d*(\.\d+)?$/, message: 'Please enter a valid number'}, {isNum: true, message:'Please enter a valid number'}],
   }
 
   const validate = (fromData) =>{
@@ -38,10 +31,15 @@ export default function ExpenseForm({setExpenses}) {
           return true
         }
 
-        if(rule.isNum && isNaN(value)){
+        if(rule.pattern && !rule.pattern.test(value)){
           errorsData[key] = rule.message
           return true
-        }    
+        }
+
+        // if(rule.isNum && isNaN(value)){
+        //   errorsData[key] = rule.message
+        //   return true
+        // }    
 
       })
 
@@ -57,6 +55,24 @@ export default function ExpenseForm({setExpenses}) {
     const validateResult = validate(expense)
  
     if(Object.keys(validateResult).length) return
+
+    if(editingRowId){
+       setExpenses((prevState)=>
+        prevState.map((prevExpense)=>{
+          if(prevExpense.id === editingRowId){
+            return {...expense, id:editingRowId}
+          }
+          return prevExpense
+        })
+       )
+       setExpense({
+        title:'',
+        category:'',
+        amount:'',
+      })
+       setEditingRowId('')
+       return
+    }
 
     setExpenses((prevState)=>[...prevState,{...expense, id:crypto.randomUUID()}])
     setExpense({
@@ -85,7 +101,7 @@ export default function ExpenseForm({setExpenses}) {
       
       <Input label='Amount' name='amount' id='amount' value={expense.amount} onChange={handleChange} errors={errors.amount} />
      
-      <button className="add-btn">Add</button>
+      <button className="add-btn">{editingRowId ? 'Save' : 'Add'}</button>
     </form>
     </>
   )
