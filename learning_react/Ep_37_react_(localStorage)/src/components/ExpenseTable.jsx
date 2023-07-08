@@ -9,7 +9,7 @@ export default function ExpenseTable({expenses, setExpense, setExpenses, setEdit
   const [menuPosition, setMenuPosition] = useState({})
   const [rowId, setRowId] = useState('')
   const [sortCallback, setSortCallback] = useState(()=>() =>{})
-  console.log(sortCallback)
+  // console.log(sortCallback)
   
   
 
@@ -19,7 +19,7 @@ export default function ExpenseTable({expenses, setExpense, setExpenses, setEdit
 
   // setEditingRowId(rowId)
   
-  console.log('Rendering')
+  // console.log('Rendering')
 
   return (
    <> 
